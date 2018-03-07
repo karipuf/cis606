@@ -3,16 +3,17 @@ import keras.backend as K
 import numpy as np
 import pylab as pl
 
-mod=keras.models.load_model('model1.hdf')
+#mod=keras.models.load_model('model1.hdf')
+mod=keras.models.load_model('gap_model.hdf')
 
 # Inits
-outLayer=9
-n_iter=500
+outLayer=22
+n_iter=100
 eta=.8
 
 # Loss function
 ims=[]
-for filtN in range(9):
+for filtN in range(16):
 
     
     f=K.function([mod.layers[0].input],[K.mean(mod.layers[outLayer].output[:,:,:,filtN])])
@@ -33,8 +34,8 @@ for filtN in range(9):
 
     ims.append(im[0])
 
-for count in range(9):
-    pl.subplot(3,3,count+1)
+for count in range(16):
+    pl.subplot(4,4,count+1)
     pl.imshow(ims[count])
 
 
