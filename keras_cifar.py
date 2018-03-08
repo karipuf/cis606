@@ -27,7 +27,7 @@ xtest=xtest.astype('float32')/255.
 # In[50]:
 
 # Creating classification network
-inp=Input(shape=(32,32,3))
+inp=Input(shape=(None,None,3))
 l1=Conv2D(32,(3,3),padding='valid',strides=(1,1))(inp)
 l1=Dropout(.2)(Activation('relu')(BatchNormalization()(l1)))
 l2=Conv2D(64,(3,3),padding='valid',strides=(1,1))(l1)

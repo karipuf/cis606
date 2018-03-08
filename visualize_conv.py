@@ -4,11 +4,11 @@ import numpy as np
 import pylab as pl
 
 #mod=keras.models.load_model('model1.hdf')
-mod=keras.models.load_model('gap_model.hdf')
+mod=keras.models.load_model('gap_model2.hdf')
 
 # Inits
-outLayer=22
-n_iter=100
+outLayer=25
+n_iter=120
 eta=.8
 
 # Loss function
@@ -19,7 +19,7 @@ for filtN in range(16):
     f=K.function([mod.layers[0].input],[K.mean(mod.layers[outLayer].output[:,:,:,filtN])])
     grad=K.gradients(f.outputs[0],mod.layers[0].input)[0]
     df=K.function([mod.layers[0].input],[grad])
-    im=np.random.rand(1,32,32,3)
+    im=np.random.rand(1,64,64,3)
 
     for count in range(n_iter):
 
