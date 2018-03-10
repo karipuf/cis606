@@ -18,12 +18,13 @@ def CreateAutoCNN(nUnits=(32,64,128),inShape=(None,None,3),dropProb=.2,nClasses=
     tens=inp
     
     for n in nUnits:
-        tens=Conv2D(n,(3,3),padding='valid',strides=2)(tens)
+        tens=Conv2D(n,(3,3),padding='same')(tens)
+        tens=MaxPooling2D((2,2),padding='same')(tens)
         tens=Dropout(dropProb)(Activation('relu')(BatchNormalization()(tens)))
         
     for n in nUnits[::-1]:
-        tens=UpSampling2D()(tens)
-        tens=Conv2DTranspose(n,(3,3),padding='valid',strides=1)(tens)
+        tens=Conv2DTranspose(n,(3,3),padding='same',strides=2)(tens)
+        #tens=UpSampling2D()(tens)
         tens=Dropout(dropProb)(Activation('relu')(BatchNormalization()(tens)))  
 
 
