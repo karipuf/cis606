@@ -1,7 +1,11 @@
-
-# coding: utf-8
-
-# In[ ]:
+from argparse import ArgumentParser
+ap=ArgumentParser()
+ap.add_argument('-n',help='Number of epochs (default 60)')
+ap.add_argument('-a',help='Architecture of CNNs - defaults to "[32,64,128]"')
+ap.add_argument('-l',help='Learning rate to use (default 0.0001)')
+ap.add_argument('-d',help='Dropout rate (default 0.2)')
+ap.add_argument('-x',help='Width/height of the image (default 128)')
+parsed=ap.parse_args()
 
 import numpy as np
 import keras
@@ -12,8 +16,17 @@ from keras.utils import np_utils
 from keras.optimizers import Adam
 from keras.preprocessing.image import ImageDataGenerator
 
-# Creating classification network with GAP output
-def CreateAutoCNN(nUnits=(32,64,128),inShape=(None,None,3),dropProb=.2,nClasses=10,linearOut=False):
+
+####################
+# Functions
+####################
+
+def ProcessArg(tmp,defaultVal):
+        if tmp==None: return defaultVal
+        else: return int(tmp)
+        
+
+def CreateAutoCNN(nUnits=(32,64,128),inShape=(None,None,3),dropProb=.2,nClasses=10,linearOut=False,learnRate=0.0001):
     
     inp=Input(shape=inShape)
     tens=inp
@@ -31,20 +44,37 @@ def CreateAutoCNN(nUnits=(32,64,128),inShape=(None,None,3),dropProb=.2,nClasses=
 
     tens=Conv2D(3,(1,1))(tens)
     mod=Model(inputs=inp,outputs=tens)
-    mod.compile(Adam(lr=.0001),'mse')
+    mod.compile(Adam(lr=learnRate),'mse')
 
     return mod
 
+#######################
+# Setting parameters
+#######################
+
+nEpochs=ProcessArg(parsed.n,60)
+learnRate=ProcessArg(parsed.l,0.0001)
+dropProb=ProcessArg(parsed.d,0.2)
+imSize=ProcessArg(parsed.x,128)
+if parsed.a==None: arch=(32,64,128)
+else: arch=eval(parsed.a)    
+
+
+##################
+# Operations
+##################
+
+params=zip(('epochs','lr','drop','xy','arch'),(str(tmp) for tmp in [nEpochs,learnRate,dropProb,imSize,arch]))
+paramstring='-'.join([tmp[0]+':'+tmp[1] for tmp in params])
+print("Params: "+paramstring)
 
 # Prepping the data
-#[(xtrain,ytrain),(xtest,ytest)]=datasets.cifar10.load_data()
-print("Input images now 128x128, (64,128) CNN")
-imageit=ImageDataGenerator(horizontal_flip=True,rotation_range=20).flow_from_directory("/home/wlwoon/data/LFW/lfw-deepfunneled/",batch_size=15000,target_size=(128,128))
+imageit=ImageDataGenerator(horizontal_flip=True,rotation_range=20).flow_from_directory("/home/wlwoon/data/LFW/lfw-deepfunneled/",batch_size=15000,target_size=(imSize,imSize))
 x=imageit.next()[0]/255.
 
 # Creating model and training
 #mod=CreateAutoCNN((32,64,64,128,128))
-mod=CreateAutoCNN((64,128))
-mod.fit(x,x,epochs=60,batch_size=128,validation_split=.1)
+mod=CreateAutoCNN(nUnits=arch,dropProb=dropProb,learnRate=learnRate)
+mod.fit(x,x,epochs=nEpochs,batch_size=128,validation_split=.1)
 
-#print(np.sum(np.sum(np.argmax(ytest,axis=1)==np.argmax(mod.predict(xtest),axis=1))))
+mod.save('models/facemodel_'+paramstring+'.hdf')
