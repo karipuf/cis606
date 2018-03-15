@@ -4,6 +4,7 @@
 # In[ ]:
 
 import numpy as np
+import keras
 from keras import datasets
 from keras.models import Model,Sequential
 from keras.layers import Dropout,Dense,Conv2D,Conv2DTranspose,Activation,Input,Convolution2D,Flatten,BatchNormalization,GlobalAveragePooling2D,Softmax,UpSampling2D,MaxPooling2D,AveragePooling2D
